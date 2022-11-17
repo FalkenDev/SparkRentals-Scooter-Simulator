@@ -1,0 +1,22 @@
+{
+  "name": "sparkrentals-scooter-simulator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FalkenDev/SparkRentals-Scooter-Simulator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FalkenDev/SparkRentals-Scooter-Simulator/issues"
+  },
+  "homepage": "https://github.com/FalkenDev/SparkRentals-Scooter-Simulator#readme",
+  "dependencies": {
+    "mongodb": "^4.12.0"
+  }
+}
