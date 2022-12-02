@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node scooter.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/FalkenDev/SparkRentals-Scooter-Simulator#readme",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "mongodb": "^4.12.0"
   }
 }
