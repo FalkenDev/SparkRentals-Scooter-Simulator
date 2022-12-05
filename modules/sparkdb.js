@@ -83,25 +83,55 @@ async function pushScooter(scooter) {
   * @param ObjectID scooterID
   * @param TripObject logEntry
   * 
-  * @return void
+  * @return bool
   */
 async function pushLog(scooterID, logEntry) {
     const client = new MongoClient(mongoURI);
     try {
         const database = client.db(databaseName);
         const collection = database.collection(collectionName);
-        scooter = await collection.updateOne({ _id: scooterID }, {
+        const result = await collection.updateOne({ _id: scooterID }, {
             $push: { log: logEntry }
         });
+        if (result.matchedCount !== 1) {
+            throw "Error updating scooter in database.";
+        }
+        return true;
     } catch (e) {
         console.log(e);
+        return false;
     } finally {
         await client.close();
     }
 }
 
+/**
+  * @param mixed coordinates
+  * @param number speed
+  * @param number battery
+  * 
+  * @return bool
+  */
 async function updateScooterStates(coordinates, speed, battery) {
-
+    const client = new MongoClient(mongoURI);
+    try {
+        const database = client.db(databaseName);
+        const collection = database.collection(collectionName);
+        scooter = await collection.updateOne({ _id: scooterID }, {
+            $set: {
+                coordinates: coordinates,  speed: speed, battery: battery
+            }
+        });
+        if (result.matchedCount !== 1) {
+            throw "Error updating scooter in database.";
+        }
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    } finally {
+        await client.close();
+    }
 }
 
 module.exports = {

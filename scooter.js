@@ -113,7 +113,7 @@ function Scooter()
         console.log("Scooter is running");
         console.log("Connected to database:", db.getMongoURI());
         console.log("Update frequency is", updateFrequencyMilliseconds, "ms");
-    }
+    };
     this.update = async () => {
         const result = await LoadScooter(this._id);
         if (result.status !== this.status) {
@@ -135,7 +135,7 @@ function Scooter()
                 this.status = result.status;
             } else if (result.status === "Off") {
                 // Log?
-                console.log("Remote shutdown..")
+                console.log("Remote shutdown..");
                 process.exit(0);
             }
         }
