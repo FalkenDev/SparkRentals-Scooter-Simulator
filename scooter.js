@@ -17,11 +17,15 @@
  */
 
 require("dotenv").config();
-const { ObjectID } = require("mongodb");
+const { ObjectId } = require("mongodb");
 const db = require("./modules/sparkdb");
 const { GPSComponent } = require("./modules/gps");
 
 const updateFrequencyMilliseconds = 1000;
+const batteryDepletionRate = .05;
+const lowBatteryWarning = 10;
+
+const namingPrefix = "Spark-Rentals#";
 
 /**
  * Loads scooter from database using id
@@ -45,23 +49,53 @@ async function LoadScooter(id) {
   */
 async function NewScooter() {
     const gps = new GPSComponent();
+    const id = new ObjectId();
     const scooter = {
-        _id: new ObjectID(),
+        _id: id,
         status: "Available",
-        battery: 100,
+        name: namingPrefix + id.toString().slice(id.toString().length - 4, id.toString().length),
+        battery: Math.max(20, Math.random() * 100),
         owner: "Karlskrona",
         currentTrip: null,
         log: [],
         speed: gps.speed,
         coordinates: gps.coordinates
     };
-    const result = db.pushScooter(scooter);
+    const result = await db.pushScooter(scooter);
     if (!result) {
         console.log("Error pushing scooter to database...");
         process.exit(1);
     }
     return scooter;
 }
+
+/**
+ * Clears the last line in the console
+ * @return void
+ */
+function clearLastLine() {
+    process.stdout.moveCursor(0, -1);
+    process.stdout.clearLine(1);
+}
+
+/**
+ * Prepares for logging to console by clearing a few lines
+ * @return void
+ */
+function prepareWindowForPrint() {
+    for (let index = 0; index < 6; index++) {
+        clearLastLine();
+    }
+}
+
+function printScooter(scooter) {
+    console.log("Connected to database:", db.getMongoURI());
+    console.log("Update frequency:", updateFrequencyMilliseconds, "ms");
+    console.log("status:", scooter.status);
+    console.log("battery:", scooter.battery);
+    console.log("coordinates:", "{ " + scooter.gpsComponent.coordinates.latitude + ", " + scooter.gpsComponent.coordinates.longitude + " }");
+    console.log("speed:", scooter.gpsComponent.speed, "km/h")
+} 
 
 /**
  * @param ObjectID id
@@ -78,6 +112,7 @@ function Scooter()
     this._id = null;
     this.set = data => {
         this._id = data._id;
+        this.name = data.name;
         this.status = data.status;
         this.ownerID = data.ownerID;
         this.battery = data.battery;
@@ -88,6 +123,7 @@ function Scooter()
     this.dbData = () => {
         return {
             _id: this._id,
+            name: this.name,
             status: this.status,
             battery: this.battery,
             ownerID: this.ownerID,
@@ -105,16 +141,17 @@ function Scooter()
             const result = await NewScooter();
             this.set(result);
         }
-        console.log("Starting scooter:", this._id);
+        console.log("Starting scooter:", this.name);
         if (!this._id) {
             console.log("Something bad happened, error with id");
             process.exit(1);
         }
+        await this.gpsComponent.loadRoute();
         console.log("Scooter is running");
-        console.log("Connected to database:", db.getMongoURI());
-        console.log("Update frequency is", updateFrequencyMilliseconds, "ms");
+        printScooter(this);
     };
     this.update = async () => {
+        this.battery -= batteryDepletionRate;
         const result = await LoadScooter(this._id);
         if (result.status !== this.status) {
             if (result.status === "In use") {
@@ -139,7 +176,14 @@ function Scooter()
                 process.exit(0);
             }
         }
-        db.updateScooterStates(this.coordinates, this.gpsComponent.speed, this.battery);
+        if (this.battery < lowBatteryWarning) {
+            this.status = "Low battery";
+            db.updateStatus(this._id, this.status);
+        }
+        this.gpsComponent.update(updateFrequencyMilliseconds);
+        db.updateScooterStates(this._id, this.gpsComponent.coordinates, this.gpsComponent.speed, this.battery);
+        prepareWindowForPrint();
+        printScooter(this);
         setTimeout(this.update, updateFrequencyMilliseconds)
     };
 }
