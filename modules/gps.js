@@ -10,6 +10,15 @@ const maxLon = 15.593868;
 
 const routePadding = 10;
 
+/**
+ * Takes lat and lon from source to destination, calculates distnace in km
+ * @param mixed lat1
+ * @param mixed lat2
+ * @param mixed lon1
+ * @param mixed lon2
+ * 
+ * @return number
+ */
 function distance(lat1, lat2, lon1, lon2) {
     // The math module contains a function
     // named toRadians which converts from
@@ -36,6 +45,11 @@ function distance(lat1, lat2, lon1, lon2) {
     return(c * r);
 }
 
+/**
+ * Returns random coordinate in boundary defined above.
+ * Currently hard coded for trossö
+ * @return coordinate
+ */
 function getRandomCoordnates() {
     const latSpan = maxLat - minLat;
     const lonSpan = maxLon - minLon;
@@ -93,6 +107,10 @@ function GPSComponent (coordinates) {
     }
 }
 
+/**
+ * RouteHandler, handles loading and moving on a route.
+ * @return RouteHandler
+ */
 function RouteHandler () {
     this.route = null;
     this.generateRoute = async (start, destination) => {

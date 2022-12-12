@@ -98,7 +98,13 @@ function printScooter(scooter) {
 } 
 
 /**
- * @param ObjectID id
+ * A single scooter simulating a real electric scooter.
+ * 
+ * functions:
+ * load()
+ * update()
+ * set()
+ * dbData()
  * 
  * @return void
  */
@@ -133,7 +139,7 @@ function Scooter()
             coordinates: this.gpsComponent.coordinates
         };
     };
-    this.load = async (id) => {
+    this.load = async (id, print) => {
         if (id) {
             const result = await LoadScooter(id);
             this.set(result);
@@ -141,16 +147,20 @@ function Scooter()
             const result = await NewScooter();
             this.set(result);
         }
-        console.log("Starting scooter:", this.name);
+        if (print) {
+            console.log("Starting scooter:", this.name);
+        }
         if (!this._id) {
             console.log("Something bad happened, error with id");
             process.exit(1);
         }
         await this.gpsComponent.loadRoute();
-        console.log("Scooter is running");
-        printScooter(this);
+        if (print) {
+            console.log("Scooter is running");
+            printScooter(this);
+        }
     };
-    this.update = async () => {
+    this.update = async (print) => {
         this.battery -= batteryDepletionRate;
         const result = await LoadScooter(this._id);
         if (result.status !== this.status) {
@@ -172,8 +182,10 @@ function Scooter()
                 this.status = result.status;
             } else if (result.status === "Off") {
                 // Log?
+                // Remote shutdown, causes early return
+                this.status === result.status;
                 console.log("Remote shutdown..");
-                process.exit(0);
+                return 0;
             }
         }
         if (this.battery < lowBatteryWarning) {
@@ -182,20 +194,23 @@ function Scooter()
         }
         this.gpsComponent.update(updateFrequencyMilliseconds);
         db.updateScooterStates(this._id, this.gpsComponent.coordinates, this.gpsComponent.speed, this.battery);
-        prepareWindowForPrint();
-        printScooter(this);
-        setTimeout(this.update, updateFrequencyMilliseconds)
+        if (print) {
+            prepareWindowForPrint();
+            printScooter(this);
+        }
+        setTimeout(() => this.update(print), updateFrequencyMilliseconds)
     };
 }
 
 async function main() {
     const scooter = new Scooter();
-    await scooter.load();
-    scooter.update();
+    await scooter.load(true);
+    scooter.update(true);
 }
 
 if (require.main === module) {
     db.setMongoURI(process.env.DBURI);
+    db.connect();
     main();
 }
 
