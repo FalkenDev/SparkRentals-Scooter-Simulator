@@ -9,6 +9,9 @@ let mongoURI = "mongodb://localhost:27017"; // Default setting
 const databaseName = "spark-rentals";
 const collectionName = "scooters";
 
+// Define client up here. close when user want to close
+let client = null;
+
 /**
  * Sets the connection string for the database connection
  * returns true if success and false if fail
@@ -42,7 +45,7 @@ function getMongoURI () {
  * @return null | scooter object
  */
 async function findScooter(id) {
-    const client = new MongoClient(mongoURI);
+    // const client = new MongoClient(mongoURI);
     let scooter = null;
     try {
         const database = client.db(databaseName);
@@ -53,7 +56,7 @@ async function findScooter(id) {
     } catch (e) {
         console.log(e);
     } finally {
-        await client.close();
+        // await client.close();
     }
     return scooter;
 }
@@ -66,7 +69,7 @@ async function findScooter(id) {
  * @return bool | scooter
  */
 async function pushScooter(scooter) {
-    const client = new MongoClient(mongoURI);
+    // const client = new MongoClient(mongoURI);
     try {
         const database = client.db(databaseName);
         const collection = database.collection(collectionName);
@@ -74,7 +77,7 @@ async function pushScooter(scooter) {
     } catch (e) {
         console.log(e);
     } finally {
-        await client.close();
+        // await client.close();
     }
     return scooter;
 }
@@ -86,7 +89,7 @@ async function pushScooter(scooter) {
   * @return bool
   */
 async function pushLog(scooterID, logEntry) {
-    const client = new MongoClient(mongoURI);
+    // const client = new MongoClient(mongoURI);
     try {
         const database = client.db(databaseName);
         const collection = database.collection(collectionName);
@@ -101,7 +104,7 @@ async function pushLog(scooterID, logEntry) {
         console.log(e);
         return false;
     } finally {
-        await client.close();
+        // await client.close();
     }
 }
 
@@ -113,7 +116,7 @@ async function pushLog(scooterID, logEntry) {
   * @return bool
   */
 async function updateScooterStates(scooterID, coordinates, speed, battery) {
-    const client = new MongoClient(mongoURI);
+    // const client = new MongoClient(mongoURI);
     try {
         const database = client.db(databaseName);
         const collection = database.collection(collectionName);
@@ -132,7 +135,7 @@ async function updateScooterStates(scooterID, coordinates, speed, battery) {
         console.log(e);
         return false;
     } finally {
-        await client.close();
+        // await client.close();
     }
 }
 
@@ -144,7 +147,7 @@ async function updateScooterStates(scooterID, coordinates, speed, battery) {
   * @return bool
   */
 async function updateStatus(scooterID, status) {
-    const client = new MongoClient(mongoURI);
+    // const client = new MongoClient(mongoURI);
     try {
         const database = client.db(databaseName);
         const collection = database.collection(collectionName);
@@ -161,8 +164,34 @@ async function updateStatus(scooterID, status) {
         console.log(e);
         return false;
     } finally {
-        await client.close();
+        // await client.close();
     }
+}
+
+/**
+ * Opens connection to database
+  * @return bool
+  */
+function connect() {
+    try {
+        client = new MongoClient(mongoURI);
+    } catch {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Closes connection to database.
+  * @return bool
+  */
+async function close() {
+    try {
+        await client.close();
+    } catch (e) {
+        return false;
+    }
+    return true;
 }
 
 module.exports = {
@@ -172,5 +201,7 @@ module.exports = {
     pushScooter: pushScooter,
     pushLog: pushLog,
     updateScooterStates: updateScooterStates,
-    updateStatus: updateStatus
+    updateStatus: updateStatus,
+    connect: connect,
+    close: close
 }
