@@ -8,7 +8,7 @@ const minLat = 56.158594;
 const minLon = 15.583096;
 const maxLon = 15.593868;
 
-const routePadding = 10;
+const routePadding = 5;
 
 /**
  * Takes lat and lon from source to destination, calculates distnace in km
@@ -62,13 +62,19 @@ function getRandomCoordnates() {
 function padRoute(nodes, steps) {
     const paddedNodes = [];
     for (let i = 0; i < nodes.length - 1; i++) {
-        const stepSizeLatitude = (nodes[i][1] - nodes[i + 1][1]) / steps;
-        const stepSizeLongitude = (nodes[i][0] - nodes[i + 1][0]) / steps;
+        const stepSizeLatitude = (nodes[i + 1][1] - nodes[i][1]) / steps;
+        const stepSizeLongitude = (nodes[i + 1][0] - nodes[i][0]) / steps;
         for (let j = 0; j < steps; j++) {
-            const lat = nodes[i][1] + (stepSizeLatitude * j);
-            const lon = nodes[i][0] + (stepSizeLongitude * j);
+            const lat = parseFloat((nodes[i][1] + (stepSizeLatitude * j)).toFixed(6));
+            const lon = parseFloat((nodes[i][0] + (stepSizeLongitude * j)).toFixed(6));
             paddedNodes.push({latitude: lat, longitude: lon})
         }
+    }
+    const org = [];
+    for (let j = 0; j < nodes.length; j++) {
+        const lat = nodes[j][1];
+        const lon = nodes[j][0];
+        org.push({latitude: lat, longitude: lon})
     }
     return paddedNodes;
 }
@@ -94,7 +100,7 @@ function GPSComponent (coordinates) {
         await this.route.generateRoute(this.coordinates, destination);
     };
     this.update = (deltaTime) => {
-        if (this.route) {
+        if (this.route && this.route.route) {
             const result = this.route.move();
             if (result.finished) {
                 // do something
