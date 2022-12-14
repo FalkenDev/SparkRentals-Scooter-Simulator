@@ -21,8 +21,8 @@ const { ObjectId } = require("mongodb");
 const db = require("./modules/sparkdb");
 const { GPSComponent } = require("./modules/gps");
 
-const updateFrequencyMilliseconds = 1000;
-const batteryDepletionRate = .05;
+const updateFrequencyMilliseconds = process.env.UPDATE_FREQUENCY_MILLISECONDS;
+const batteryDepletionRate = process.env.BATTERY_DEPLETION_RATE;
 const lowBatteryWarning = 10;
 
 const namingPrefix = "Spark-Rentals#";
@@ -47,19 +47,19 @@ async function LoadScooter(id) {
 /**
   * @return db-scooter
   */
-async function NewScooter() {
+async function NewScooter(status, owner, coordinates, battery) {
     const gps = new GPSComponent();
     const id = new ObjectId();
     const scooter = {
         _id: id,
-        status: "Available",
+        status: status ? status : "Available",
         name: namingPrefix + id.toString().slice(id.toString().length - 4, id.toString().length),
-        battery: Math.max(20, Math.random() * 100),
-        owner: "Karlskrona",
+        battery: battery ? battery : Math.max(20, Math.random() * 100),
+        owner: owner ? owner : "Karlskrona",
         currentTrip: null,
         log: [],
         speed: gps.speed,
-        coordinates: gps.coordinates
+        coordinates: coordinates ? coordinates : gps.coordinates
     };
     const result = await db.pushScooter(scooter);
     if (!result) {
@@ -99,6 +99,7 @@ function printScooter(scooter) {
 
 /**
  * A single scooter simulating a real electric scooter.
+ * Pass null to _id for new scooter
  * 
  * functions:
  * load()
@@ -108,10 +109,10 @@ function printScooter(scooter) {
  * 
  * @return void
  */
-function Scooter() 
+function Scooter(_id, status, owner, coordinates, battery) 
 {
     this.status = "Off";
-    this.ownerID = null;
+    this.owner = null;
     this.gpsComponent = null;
     this.currentTrip = {};
     this.log = [];
@@ -120,7 +121,7 @@ function Scooter()
         this._id = data._id;
         this.name = data.name;
         this.status = data.status;
-        this.ownerID = data.ownerID;
+        this.owner = data.owner;
         this.battery = data.battery;
         this.gpsComponent = new GPSComponent(data.coordinates);
         this.currentTrip = data.currentTrip;
@@ -132,7 +133,7 @@ function Scooter()
             name: this.name,
             status: this.status,
             battery: this.battery,
-            ownerID: this.ownerID,
+            owner: this.owner,
             currentTrip: this.currentTrip,
             log: this.log,
             speed: this.gpsComponent.speed,
@@ -144,7 +145,7 @@ function Scooter()
             const result = await LoadScooter(id);
             this.set(result);
         } else {
-            const result = await NewScooter();
+            const result = await NewScooter(status, owner, coordinates, battery);
             this.set(result);
         }
         if (print) {
@@ -154,7 +155,7 @@ function Scooter()
             console.log("Something bad happened, error with id");
             process.exit(1);
         }
-        await this.gpsComponent.loadRoute();
+        // await this.gpsComponent.loadRoute();
         if (print) {
             console.log("Scooter is running");
             printScooter(this);
@@ -168,6 +169,7 @@ function Scooter()
                 // Start the new trip
                 // Rest api have created initialized trip, sync state only
                 console.log("New trip started");
+                this.gpsComponent.loadRoute();
                 this.currentTrip = result.currentTrip;
                 this.status = result.status;
             } else if (result.status === "Available" && this.status === "In use") {
@@ -184,12 +186,12 @@ function Scooter()
                 // Log?
                 // Remote shutdown, causes early return
                 this.status === result.status;
-                console.log("Remote shutdown..");
+                console.log(`${this.name}: Remote shutdown..`);
                 return 0;
             }
         }
         if (this.battery < lowBatteryWarning) {
-            this.status = "Low battery";
+            this.status = "Unavailable";
             db.updateStatus(this._id, this.status);
         }
         this.gpsComponent.update(updateFrequencyMilliseconds);
@@ -204,7 +206,7 @@ function Scooter()
 
 async function main() {
     const scooter = new Scooter();
-    await scooter.load(true);
+    await scooter.load(false, true);
     scooter.update(true);
 }
 
