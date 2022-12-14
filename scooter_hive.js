@@ -10,6 +10,7 @@
 
 const { Scooter } = require("./scooter");
 const db = require("./modules/sparkdb");
+const scooter = require("./scooter");
 
 const numberOfScooters = process.env.NUMBER_OF_SCOOTERS;
 
@@ -48,6 +49,30 @@ async function startUpdateScooters(scooterArray) {
     });
 }
 
+/**
+ * Prints useful information about the current state of the scooters
+  * @param mixed scooters
+  * @param bool repeat
+  * 
+  * @return [type]
+  */
+async function printScooters(scooters, repeat) {
+    const totalScooters = scooters.length;
+    const scootersStateCount = {};
+    for (let i = 0; i < totalScooters; i++) {
+        const scooter = scooters[i];
+        // console.log(scooter);
+        scootersStateCount[scooter.status] = scootersStateCount[scooter.status] ? scootersStateCount[scooter.status] + 1 : 1;
+    }
+    for (const state in scootersStateCount) {
+        console.log(state, scootersStateCount[state]);
+    }
+    console.log("============================")
+    if (repeat) {
+        setTimeout(() => printScooters(scooters, repeat), 5000);
+    }
+}
+
 async function main() {
     db.setMongoURI(process.env.DBURI);
     db.connect();
@@ -55,6 +80,7 @@ async function main() {
     const scooters = await loadNewScooters();
     console.log("Starting scooters")
     startUpdateScooters(scooters);
+    printScooters(scooters, true);
     //TODO: Add watch on mongoDB database
     //IF NEW SCOOTER, ADD IT
     //IF SCOOTER IS REMOVED, REMOVES IT FROM ARRAY
