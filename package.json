@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/FalkenDev/SparkRentals-Scooter-Simulator#readme",
   "dependencies": {
+    "axios": "^1.2.1",
     "dotenv": "^16.0.3",
     "mongodb": "^4.12.0"
   }
