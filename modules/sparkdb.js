@@ -169,7 +169,7 @@ async function updateStatus(scooterID, status) {
 }
 
 /**
- * Opens connection to database
+  * Opens connection to database
   * @return bool
   */
 function connect() {
@@ -194,6 +194,54 @@ async function close() {
     return true;
 }
 
+/**
+  * Returns all documents from collection specified
+  * @param string name
+  * 
+  * @return []
+  */
+async function getAllFromCollection(name) {
+    const database = client.db(databaseName);
+    const collection = database.collection(name);
+    const cursor = collection.find({});
+    const items = [];
+    await cursor.forEach((item) => {
+        items.push(item);
+    });
+    return items;
+}
+
+/**
+  * Returns all documents from collection "users"
+  * @return []
+  */
+async function getAllUsers() {
+    return await getAllFromCollection("users");
+}
+
+/**
+  * Returns all documents from collection "scooters"
+  * @return []
+  */
+async function getAllScooters() {
+    return await getAllFromCollection("scooters");
+}
+
+/**
+  * Returns all documents from collection "scooters"
+  * @return []
+  */
+async function getScootersInUse() {
+    const database = client.db(databaseName);
+    const collection = database.collection(collectionName);
+    const cursor = collection.find({ status: "In use" });
+    const items = [];
+    await cursor.forEach((item) => {
+        items.push(item);
+    });
+    return items;
+}
+
 module.exports = {
     setMongoURI: setMongoURI,
     getMongoURI: getMongoURI,
@@ -203,5 +251,8 @@ module.exports = {
     updateScooterStates: updateScooterStates,
     updateStatus: updateStatus,
     connect: connect,
-    close: close
+    close: close,
+    getAllUsers: getAllUsers,
+    getAllScooters: getAllScooters,
+    getScootersInUse: getScootersInUse
 }
