@@ -56,7 +56,7 @@ async function NewScooter(status, owner, coordinates, battery) {
         name: namingPrefix + id.toString().slice(id.toString().length - 4, id.toString().length),
         battery: battery ? battery : Math.max(20, Math.random() * 100),
         owner: owner ? owner : "Karlskrona",
-        currentTrip: null,
+        trip: null,
         log: [],
         speed: gps.speed,
         coordinates: coordinates ? coordinates : gps.coordinates
@@ -114,7 +114,7 @@ function Scooter(_id, status, owner, coordinates, battery)
     this.status = "Off";
     this.owner = null;
     this.gpsComponent = null;
-    this.currentTrip = {};
+    this.trip = {};
     this.log = [];
     this._id = null;
     this.set = data => {
@@ -124,7 +124,7 @@ function Scooter(_id, status, owner, coordinates, battery)
         this.owner = data.owner;
         this.battery = data.battery;
         this.gpsComponent = new GPSComponent(data.coordinates);
-        this.currentTrip = data.currentTrip;
+        this.trip = data.trip;
         this.log = data.log;
     };
     this.dbData = () => {
@@ -162,9 +162,10 @@ function Scooter(_id, status, owner, coordinates, battery)
         }
     };
     this.update = async (print) => {
-        this.battery -= batteryDepletionRate;
+        this.battery -= batteryDepletionRate * (this.gpsComponent.speed + 1);
         const result = await LoadScooter(this._id);
         if (result.status !== this.status) {
+            this.status === result.status;
             if (result.status === "In use") {
                 // Start the new trip
                 // Rest api have created initialized trip, sync state only
@@ -181,11 +182,7 @@ function Scooter(_id, status, owner, coordinates, battery)
                 };
                 db.pushLog(this._id, newLogEntry);
                 this.currentTrip = null;
-                this.status = result.status;
             } else if (result.status === "Off") {
-                // Log?
-                // Remote shutdown, causes early return
-                this.status === result.status;
                 console.log(`${this.name}: Remote shutdown..`);
                 return 0;
             }

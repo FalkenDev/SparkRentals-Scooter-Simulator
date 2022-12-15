@@ -67,7 +67,7 @@ async function printScooters(scooters, repeat) {
     for (const state in scootersStateCount) {
         console.log(state, scootersStateCount[state]);
     }
-    console.log("============================")
+    console.log("============================");
     if (repeat) {
         setTimeout(() => printScooters(scooters, repeat), 5000);
     }
