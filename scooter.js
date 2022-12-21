@@ -162,20 +162,24 @@ function Scooter(_id, status, owner, coordinates, battery)
         }
     };
     this.update = async (print) => {
-        this.battery -= batteryDepletionRate * (this.gpsComponent.speed + 1);
         const result = await LoadScooter(this._id);
+        //If scooter is turned of it wont do anything
+        if (this.status === "Off" && result.status === "Off") {
+            setTimeout(() => this.update(print), updateFrequencyMilliseconds)
+            return;
+        }
+        this.battery -= batteryDepletionRate * (this.gpsComponent.speed + 1);
         if (result.status !== this.status) {
-            this.status === result.status;
             if (result.status === "In use") {
                 // Start the new trip
                 // Rest api have created initialized trip, sync state only
-                console.log("New trip started");
+                console.log(`${this.name}: Starting trip`)
                 this.gpsComponent.loadRoute();
                 this.currentTrip = result.currentTrip;
                 this.status = result.status;
             } else if (result.status === "Available" && this.status === "In use") {
                 // Stop the current trip
-                console.log("Current trip has ended")
+                console.log(`${this.name}: Ending trip`)
                 const newLogEntry = {
                     ...this.currentTrip,
                     endPosition: { ...this.gpsComponent.coordinates }
@@ -184,8 +188,11 @@ function Scooter(_id, status, owner, coordinates, battery)
                 this.currentTrip = null;
             } else if (result.status === "Off") {
                 console.log(`${this.name}: Remote shutdown..`);
-                return 0;
+            } else if (this.status === "Off" && result.status !== "Off") {
+                // REMOVE ACTIVATIOM
+                console.log(`${this.name}: Remote activation..`);
             }
+            this.status = result.status;
         }
         if (this.battery < lowBatteryWarning) {
             this.status = "Unavailable";
