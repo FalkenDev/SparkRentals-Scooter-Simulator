@@ -53,7 +53,7 @@ async function stopTrip(scooter_id, user_id, token) {
 }
 
 async function rentWatch() {
-    const scooters = await db.getScootersInUse();
+    const scooters = await db.getScootersInUse(process.env.SIMULATION_CITY);
     console.log("scooters in use:", scooters.length);
     scooters.forEach(scooter => {
         if (scooter.trip && scooter.trip.userId && scooter.speed === 0) {
@@ -64,6 +64,9 @@ async function rentWatch() {
     });
     if (scooters.length > 0) {
         setTimeout(rentWatch, rentWatchPollRate);
+    } else {
+        console.log("Simulation complete, shutting down");
+        process.exit(0);
     }
 }
 
@@ -79,7 +82,7 @@ async function main() {
     for (let i = 0; i < users.length && i < scooters.length; i++) {
         const user = users[i];
         const scooter = scooters[i];
-        if (scooter.status === "Available" && user.balance > 50) {
+        if (scooter.status === "Available" && user.balance > 50 && scooter.owner === process.env.SIMULATION_CITY) {
             const response = await rentScooter(scooter._id.toString(), user._id.toString(), token);
         }
     }
