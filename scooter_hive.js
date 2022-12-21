@@ -10,9 +10,9 @@
 
 const { Scooter } = require("./scooter");
 const db = require("./modules/sparkdb");
-const scooter = require("./scooter");
 
 const numberOfScooters = process.env.NUMBER_OF_SCOOTERS;
+let scooters = [];
 
 /**
   * Loads x number of scooters and returns them
@@ -43,8 +43,8 @@ async function startUpdate(scooter) {
   * 
   * @return [type]
   */
-async function startUpdateScooters(scooterArray) {
-    scooterArray.forEach(scooter => {
+async function startUpdateScooters() {
+    scooters.forEach(scooter => {
         startUpdate(scooter);
     });
 }
@@ -56,7 +56,7 @@ async function startUpdateScooters(scooterArray) {
   * 
   * @return [type]
   */
-async function printScooters(scooters, repeat) {
+async function printScooters(repeat) {
     const totalScooters = scooters.length;
     const scootersStateCount = {};
     for (let i = 0; i < totalScooters; i++) {
@@ -69,21 +69,38 @@ async function printScooters(scooters, repeat) {
     }
     console.log("============================");
     if (repeat) {
-        setTimeout(() => printScooters(scooters, repeat), 5000);
+        setTimeout(() => printScooters(repeat), 5000);
     }
+}
+
+/**
+  * @return [type]
+  */
+async function dropCallback() {
+    console.log("Loading up new scooters:", numberOfScooters);
+    const existingScooters = await db.getAllScooters();
+    const oldScooters = [];
+    for (let i = 0; i < existingScooters.length; i++) {
+        const scooter = new Scooter();
+        await scooter.load(existingScooters[i]._id.toString());
+        oldScooters.push(scooter);
+    }
+    scooters = await loadNewScooters();
+    scooters = scooters.concat(oldScooters);
+    console.log("Starting scooters")
+    startUpdateScooters(scooters);
+    printScooters(true);
+    //TODO: Add watch on mongoDB database
+    //IF NEW SCOOTER, ADD IT
+    //IF SCOOTER IS REMOVED, REMOVES IT FROM ARRAY
 }
 
 async function main() {
     db.setMongoURI(process.env.DBURI);
     db.connect();
-    console.log("Loading up scooters", numberOfScooters);
-    const scooters = await loadNewScooters();
-    console.log("Starting scooters")
-    startUpdateScooters(scooters);
-    printScooters(scooters, true);
-    //TODO: Add watch on mongoDB database
-    //IF NEW SCOOTER, ADD IT
-    //IF SCOOTER IS REMOVED, REMOVES IT FROM ARRAY
+    // console.log("Dropping scooter collection...");
+    // db.dropScooters(dropCallback);
+    dropCallback();
 }
 
 if (require.main === module) {

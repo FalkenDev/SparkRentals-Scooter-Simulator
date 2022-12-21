@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node scooter.js",
-    "start-hive": "node scooter_hive.js"
+    "start-hive": "node scooter_hive.js",
+    "user-simulation": "node user_simulation.js"
   },
   "repository": {
     "type": "git",

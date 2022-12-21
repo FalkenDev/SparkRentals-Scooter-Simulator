@@ -231,15 +231,33 @@ async function getAllScooters() {
   * Returns all documents from collection "scooters"
   * @return []
   */
-async function getScootersInUse() {
+async function getScootersInUse(city) {
     const database = client.db(databaseName);
     const collection = database.collection(collectionName);
-    const cursor = collection.find({ status: "In use" });
+    const cursor = collection.find({ status: "In use", owner: city });
     const items = [];
     await cursor.forEach((item) => {
         items.push(item);
     });
     return items;
+}
+
+/**
+  * @return bool
+  */
+async function dropScooters(cb) {
+    const database = client.db(databaseName);
+    const collection = database.collection(collectionName);
+    await collection.drop((err, delOK) => {
+        if (err) {
+            throw err;
+        }
+        if (delOK) {
+            console.log(`Collection "${collectionName}" dropped successfully`);
+            cb();
+        }
+    });
+    return true;
 }
 
 module.exports = {
@@ -254,5 +272,6 @@ module.exports = {
     close: close,
     getAllUsers: getAllUsers,
     getAllScooters: getAllScooters,
-    getScootersInUse: getScootersInUse
+    getScootersInUse: getScootersInUse,
+    dropScooters: dropScooters
 }
