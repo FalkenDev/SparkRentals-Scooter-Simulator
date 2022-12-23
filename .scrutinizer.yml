@@ -3,4 +3,4 @@ filter:
 
 build:
     environment:
-        node: 18.12.1
+        node: v18.12.1
