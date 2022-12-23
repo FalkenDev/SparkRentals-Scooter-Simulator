@@ -4,3 +4,12 @@ filter:
 build:
     environment:
         node: v18.12.1
+
+build:
+    nodes:
+        analysis:
+            tests:
+                environment:
+                    node: v18.12.1
+                override:
+                    - js-scrutinizer-run
