@@ -2,10 +2,6 @@ filter:
     excluded_paths: [node_modules/*, .github/*]
 
 build:
-    environment:
-        node: v18.12.1
-
-build:
     nodes:
         analysis:
             tests:
