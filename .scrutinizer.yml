@@ -1,0 +1,6 @@
+filter:
+    excluded_paths: [node_modules/*, .github/*]
+
+build:
+    environment:
+        node: 18.12.1
