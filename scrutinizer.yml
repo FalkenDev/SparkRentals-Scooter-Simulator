@@ -1,0 +1,3 @@
+build:
+    environment:
+        node: 18.12.1
