@@ -68,16 +68,19 @@ async function rentWatch() {
         setTimeout(rentWatch, rentWatchPollRate);
     } else {
         console.log("Simulation complete, shutting down");
+        db.close();
         process.exit(0);
     }
 }
 
+async function main() {
+=======
 /** Function for stopping all scooters
   * @return void
   */
 async function stopAllTrips() {
     const scooters = await db.getScootersInUse(process.env.SIMULATION_CITY);
-    console.log("scooters in use:", scooters.length);
+    console.info("Stopping all scooters");
     scooters.forEach(async scooter => {
         if (scooter.trip && scooter.trip.userId) {
             console.log("Stopping trip for scooter:", scooter.name);
@@ -86,33 +89,10 @@ async function stopAllTrips() {
     });
 }
 
-function exitHandler(options, exitCode) {
-    if (options.cleanup) {
-        console.log('clean');
-    }
-    if (exitCode || exitCode === 0) {
-        console.log(exitCode);
-    }
-    if (options.exit) {
-        process.exit();
-    }
-}
-
 async function main() {
-    process.stdin.resume();//so the program will not close instantly
-
-
-    //do something when app is closing
-    process.on('exit', exitHandler.bind(null,{cleanup:true}));
-
-    //catches ctrl+c event
-    process.on('SIGINT', exitHandler.bind(null, {exit:true}));
-
-    // catches "kill pid" (for example: nodemon restart)
-    process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
-    process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
 
     //catches uncaught exceptions
+>>>>>>> Stashed changes
     db.setMongoURI(process.env.DBURI);
     db.connect();
     const users = await db.getAllUsers();
