@@ -10,6 +10,7 @@
 
 const { Scooter } = require("./scooter");
 const db = require("./modules/sparkdb");
+const scooter = require("./scooter");
 
 const numberOfScooters = process.env.NUMBER_OF_SCOOTERS;
 let scooters = [];
@@ -35,7 +36,11 @@ async function loadNewScooters() {
   * @return void
   */
 async function startUpdate(scooter) {
-    scooter.update();
+    try {
+        scooter.update();
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 /**
@@ -74,6 +79,25 @@ async function printScooters(repeat) {
 }
 
 /**
+ * @param string id
+ * 
+ * @return void
+ */
+function removeScooter(id) {
+    let index = -1;
+    for (let i = 0; i < scooters.length; i++) {
+        if (id === scooters[i]._id.toString()) {
+            index = i;
+            break;
+        }
+    }
+    if (index !== -1) {
+        console.log(`${scooters[index].name}: removed from database`);
+        scooters.splice(index, 1);
+    }
+}
+
+/**
   * @return [type]
   */
 async function dropCallback() {
@@ -81,7 +105,7 @@ async function dropCallback() {
     const existingScooters = await db.getAllScooters();
     const oldScooters = [];
     for (let i = 0; i < existingScooters.length; i++) {
-        const scooter = new Scooter();
+        const scooter = new Scooter(errorCallback=removeScooter);
         await scooter.load(existingScooters[i]._id.toString());
         oldScooters.push(scooter);
     }
