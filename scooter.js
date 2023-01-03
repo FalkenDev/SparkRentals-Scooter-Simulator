@@ -20,6 +20,7 @@ require("dotenv").config();
 const { ObjectId } = require("mongodb");
 const db = require("./modules/sparkdb");
 const { GPSComponent } = require("./modules/gps");
+const axios = require("axios");
 
 const updateFrequencyMilliseconds = process.env.UPDATE_FREQUENCY_MILLISECONDS;
 const batteryDepletionRate = process.env.BATTERY_DEPLETION_RATE;
@@ -38,8 +39,7 @@ const namingPrefix = "Spark-Rentals#";
 async function LoadScooter(id) {
     const scooter = await db.findScooter(id);
     if (!scooter) {
-        console.log("No scooter found, exiting..");
-        process.exit(1);
+        throw "Scooter removed";
     }
     return scooter;
 }
@@ -109,7 +109,7 @@ function printScooter(scooter) {
  * 
  * @return void
  */
-function Scooter(_id, status, owner, coordinates, battery) 
+function Scooter(errorCallback) 
 {
     this.status = "Off";
     this.owner = null;
@@ -117,6 +117,7 @@ function Scooter(_id, status, owner, coordinates, battery)
     this.trip = {};
     this.log = [];
     this._id = null;
+    this.errorCallback = errorCallback;
     this.set = data => {
         this._id = data._id;
         this.name = data.name;
@@ -145,7 +146,7 @@ function Scooter(_id, status, owner, coordinates, battery)
             const result = await LoadScooter(id);
             this.set(result);
         } else {
-            const result = await NewScooter(status, owner, coordinates, battery);
+            const result = await NewScooter();
             this.set(result);
         }
         if (print) {
@@ -162,7 +163,13 @@ function Scooter(_id, status, owner, coordinates, battery)
         }
     };
     this.update = async (print) => {
-        const result = await LoadScooter(this._id);
+        let result = null;
+        try {
+            result = await LoadScooter(this._id);
+        } catch (e) {
+            this.errorCallback(this._id.toString());
+            return;
+        }
         //If scooter is turned of it wont do anything
         if (this.status === "Off" && result.status === "Off") {
             setTimeout(() => this.update(print), updateFrequencyMilliseconds)
