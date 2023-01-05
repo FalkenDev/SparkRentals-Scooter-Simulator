@@ -11,7 +11,7 @@ const minLat = parseFloat(process.env.SIMULATION_MIN_LAT);
 const maxLon = parseFloat(process.env.SIMULATION_MAX_LON);
 const minLon = parseFloat(process.env.SIMULATION_MIN_LON);
 
-const routePadding = 15;
+const routePadding = process.env.SIMULATION_ROUTE_PADDING;
 
 /**
  * Takes lat and lon from source to destination, calculates distnace in km
@@ -108,6 +108,7 @@ function GPSComponent (coordinates) {
             if (result.finished) {
                 // do something?
                 // console.log("Arrived at destination");
+                this.speed = 0;
                 this.route = null;
             }
             this.coordinates = result.coordinates;
