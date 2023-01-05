@@ -106,8 +106,9 @@ function GPSComponent (coordinates) {
         if (this.route && this.route.route) {
             const result = this.route.move();
             if (result.finished) {
-                // do something
+                // do something?
                 // console.log("Arrived at destination");
+                this.route = null;
             }
             this.coordinates = result.coordinates;
             const deltaTimeHour = deltaTime / 1000.0 / 60.0 / 60.0; 

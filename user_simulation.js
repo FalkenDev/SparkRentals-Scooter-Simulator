@@ -74,25 +74,6 @@ async function rentWatch() {
 }
 
 async function main() {
-=======
-/** Function for stopping all scooters
-  * @return void
-  */
-async function stopAllTrips() {
-    const scooters = await db.getScootersInUse(process.env.SIMULATION_CITY);
-    console.info("Stopping all scooters");
-    scooters.forEach(async scooter => {
-        if (scooter.trip && scooter.trip.userId) {
-            console.log("Stopping trip for scooter:", scooter.name);
-            stopTrip(scooter._id.toString(), scooter.trip.userId, token);
-        }
-    });
-}
-
-async function main() {
-
-    //catches uncaught exceptions
->>>>>>> Stashed changes
     db.setMongoURI(process.env.DBURI);
     db.connect();
     const users = await db.getAllUsers();

@@ -205,6 +205,11 @@ function Scooter(errorCallback)
             this.status = "Unavailable";
             db.updateStatus(this._id, this.status);
         }
+        if (result.coordinates !== this.gpsComponent.coordinates) {
+            // new coordinates manually set
+            // If this happens when a trip is in progress, what to do?
+            this.gpsComponent.coordinates = result.coordinates;
+        }
         this.gpsComponent.update(updateFrequencyMilliseconds);
         db.updateScooterStates(this._id, this.gpsComponent.coordinates, this.gpsComponent.speed, this.battery);
         if (print) {
