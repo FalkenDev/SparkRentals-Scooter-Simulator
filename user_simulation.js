@@ -8,6 +8,7 @@ const rentEndpoint = "/scooters/rent";
 const stopEndpoint = "/scooters/stop";
 const apiKey = process.env.REACT_APP_REST_API_KEY;
 const rentWatchPollRate = 5000;
+const minBalance = 50;
 let token = null;
 
 const admin = {
@@ -56,7 +57,8 @@ async function rentWatch() {
     const scooters = await db.getScootersInUse(process.env.SIMULATION_CITY);
     console.log("scooters in use:", scooters.length);
     scooters.forEach(scooter => {
-        if (scooter.trip && scooter.trip.userId && scooter.speed === 0) {
+        //Stop the trip if speed is 0 or if battery is entering the danger zone
+        if (scooter.trip && scooter.trip.userId && (scooter.speed === 0 || scooter.battery <= 10)) {
             // Scooter has reached destination probably
             console.log("Stopping trip for scooter:", scooter.name);
             stopTrip(scooter._id.toString(), scooter.trip.userId, token);
@@ -66,6 +68,7 @@ async function rentWatch() {
         setTimeout(rentWatch, rentWatchPollRate);
     } else {
         console.log("Simulation complete, shutting down");
+        db.close();
         process.exit(0);
     }
 }
@@ -78,11 +81,12 @@ async function main() {
     console.log("Logging in as admin...");
     token = await adminLogin(admin.email, admin.password);
     console.log("Login successful");
-    //RENT ALL SCOOTERS
+    // Rent as many scooters as possible
     for (let i = 0; i < users.length && i < scooters.length; i++) {
         const user = users[i];
         const scooter = scooters[i];
-        if (scooter.status === "Available" && user.balance > 50 && scooter.owner === process.env.SIMULATION_CITY) {
+        if (scooter.status === "Available" && user.balance > minBalance && scooter.owner === process.env.SIMULATION_CITY) {
+            console.log(process.env.SIMULATION_CITY);
             const response = await rentScooter(scooter._id.toString(), user._id.toString(), token);
         }
     }
