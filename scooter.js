@@ -135,7 +135,7 @@ function Scooter(errorCallback)
             status: this.status,
             battery: this.battery,
             owner: this.owner,
-            currentTrip: this.currentTrip,
+            trip: this.trip,
             log: this.log,
             speed: this.gpsComponent.speed,
             coordinates: this.gpsComponent.coordinates
@@ -182,15 +182,17 @@ function Scooter(errorCallback)
                 // Rest api have created initialized trip, sync state only
                 console.log(`${this.name}: Starting trip`)
                 this.gpsComponent.loadRoute();
-                this.currentTrip = result.currentTrip;
+                this.trip = result.trip;
                 this.status = result.status;
             } else if (result.status === "Available" && this.status === "In use") {
                 // Stop the current trip
                 console.log(`${this.name}: Ending trip`)
                 const newLogEntry = {
-                    ...this.currentTrip,
-                    endPosition: { ...this.gpsComponent.coordinates }
+                    ...this.trip,
+                    endPosition: { ...this.gpsComponent.coordinates },
+                    distance: this.gpsComponent.route.traveledKilometers
                 };
+                this.gpsComponent.stopRoute();
                 db.pushLog(this._id, newLogEntry);
                 this.currentTrip = null;
             } else if (result.status === "Off") {
@@ -205,19 +207,26 @@ function Scooter(errorCallback)
             this.status = "Unavailable";
             db.updateStatus(this._id, this.status);
         }
-        if (result.coordinates !== this.gpsComponent.coordinates) {
-            // new coordinates manually set
-            // If this happens when a trip is in progress, what to do?
-            this.gpsComponent.coordinates = result.coordinates;
-        }
+        // if (result.coordinates !== this.gpsComponent.coordinates) {
+        //     // new coordinates manually set
+        //     // If this happens when a trip is in progress, what to do?
+        //     console.log(`${this.name}: Coordinate changed`)
+        //     this.gpsComponent.coordinates = result.coordinates;
+        // }
         this.gpsComponent.update(updateFrequencyMilliseconds);
         db.updateScooterStates(this._id, this.gpsComponent.coordinates, this.gpsComponent.speed, this.battery);
+        if (this.canUpdateTrip()) {
+            db.updateScooterTrip(this._id, this.gpsComponent.route.traveledKilometers);
+        }
         if (print) {
             prepareWindowForPrint();
             printScooter(this);
         }
         setTimeout(() => this.update(print), updateFrequencyMilliseconds)
     };
+    this.canUpdateTrip = () => {
+        return this.trip && this.gpsComponent.route;
+    } 
 }
 
 async function main() {

@@ -10,7 +10,6 @@
 
 const { Scooter } = require("./scooter");
 const db = require("./modules/sparkdb");
-const scooter = require("./scooter");
 
 const numberOfScooters = process.env.NUMBER_OF_SCOOTERS;
 let scooters = [];
@@ -22,26 +21,13 @@ let scooters = [];
 async function loadNewScooters() {
     const scooterArray = [];
     for (let i = 0; i < numberOfScooters; i++) {
-        const scooter = new Scooter();
+        const scooter = new Scooter(removeScooter);
         await scooter.load(); // Load up new scooter, can pass id if custom generation is wanted
         scooterArray.push(scooter);
     }
     return scooterArray;
 }
 
-/**
-  * Starts update function on scooter
-  * @param mixed scooter
-  * 
-  * @return void
-  */
-async function startUpdate(scooter) {
-    try {
-        scooter.update();
-    } catch (e) {
-        console.log(e);
-    }
-}
 
 /**
   * @param mixed scooterArray
@@ -50,7 +36,7 @@ async function startUpdate(scooter) {
   */
 async function startUpdateScooters() {
     scooters.forEach(scooter => {
-        startUpdate(scooter);
+        scooter.update();
     });
 }
 
@@ -105,14 +91,14 @@ async function dropCallback() {
     const existingScooters = await db.getAllScooters();
     const oldScooters = [];
     for (let i = 0; i < existingScooters.length; i++) {
-        const scooter = new Scooter(errorCallback=removeScooter);
+        const scooter = new Scooter(removeScooter);
         await scooter.load(existingScooters[i]._id.toString());
         oldScooters.push(scooter);
     }
     scooters = await loadNewScooters();
     scooters = scooters.concat(oldScooters);
     console.log("Starting scooters")
-    startUpdateScooters(scooters);
+    startUpdateScooters();
     printScooters(true);
     //TODO: Add watch on mongoDB database
     //IF NEW SCOOTER, ADD IT
