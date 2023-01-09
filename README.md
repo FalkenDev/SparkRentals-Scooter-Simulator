@@ -1,18 +1,17 @@
 # Scooter Simulator for SparkRentals Project
-## !OPS!
-***Unfortunately, the program is not ready and will not be ready for launch until December 13.***
 ## Content
 - [About](#about)
 - [Download](#download)
-- [Usage](#usage)
-- [Version](#version)
-- [Contact](#contact)
+- [Download and Usage](#download-and-usage)
+- [License and Tools](#license-and-tools)
 ## About
+This project is created by 4 students who attend Blekinge Institute of Technology in web programming. We were given the task of creating a system for a scooter company where we would, among other things, create a mobile-adapted web app for the customer, administrative web interface, a simulation program for the electric scooters, an intelligence program in the bicycle and a Rest API that distributes and retrieves information from the entire system and stores the information on a database.
+
+The entire project is available at: https://github.com/FalkenDev/V-Team-SparkRentals
 ### Background
 The scooter program will be the very brain of every scooter that is driven. The program will simulate several scooters with speed, gps, sessions, battery, owner, etc. When starting up the scooter, the bike will communicate with the MongoDB database to either register a new scooter or activate an existing scooter. In order for the scooter to "know" who it is, a small configuration file will be saved per scooter. If there is nothing like that saved, it is a new scooter and it will then be registered. At certain time intervals, the scooter will update the data that the scooter itself has control over. Eg position, speed and battery. At another determined interval, the scooter will retrieve information from the database to update its own status. This is so that the scooter will know if it has been rented, shut down by admin etc.
 
-## Download
-## Usage
+## Download and Usage
 To run this program you have to use either node or docker.
 The node version:
     node scooter_hive.js: This will start a hive of scooters. Spawning new ones if defined and also starting all existing scooters on your database. It will run scooters in all cities but only spawn random ones i a city of your choosing. Defined by env variables.
@@ -56,16 +55,6 @@ Required environment variables:
     # Uses same key as from the admin dashboard
     # REACT_APP_REST_API_KEY=YOUR_API_KEY
 
-## Version
-## Contact
-Have any questions?
-
-
-Reach me at:
-
-
-<falkendev@gmail.com>
-
-
-<https://www.twitch.tv/falkendev>
 ## License and Tools
+![NPM](https://img.shields.io/badge/NPM-%23000000.svg?style=for-the-badge&logo=npm&logoColor=white) ![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
