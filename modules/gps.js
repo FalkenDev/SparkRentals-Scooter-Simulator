@@ -3,7 +3,6 @@
  * This module has support for simulating movement accross a GPX route
  */
 
-const axios = require("axios");
 
 const maxLat = parseFloat(process.env.SIMULATION_MAX_LAT);
 const minLat = parseFloat(process.env.SIMULATION_MIN_LAT);
@@ -107,14 +106,18 @@ function GPSComponent (coordinates) {
             const result = this.route.move();
             if (result.finished) {
                 // do something?
-                // console.log("Arrived at destination");
                 this.speed = 0;
                 this.route = null;
+                return;
             }
             this.coordinates = result.coordinates;
             const deltaTimeHour = deltaTime / 1000.0 / 60.0 / 60.0; 
             this.speed = result.distanceTraveledKilometers / deltaTimeHour;
         }
+    }
+    this.stopRoute = () => {
+        this.route = null;
+        this.speed = 0;
     }
 }
 
@@ -124,34 +127,29 @@ function GPSComponent (coordinates) {
  */
 function RouteHandler () {
     this.route = null;
+    this.traveledKilometers = 0;
     this.generateRoute = async (start, destination) => {
         const apiKey = process.env.GEOAPIFY_KEY;
         const response = await fetch(`https://api.geoapify.com/v1/routing?waypoints=${start.latitude},${start.longitude}|${destination.latitude},${destination.longitude}&mode=walk&apiKey=${apiKey}`);
         const result = await response.json();
-        // const params = {
-        //     waypoints: `${start.latitude},${start.longitude}|${destination.latitude},${destination.longitude}`,
-        //     mode: "walk",
-        //     apiKey: apiKey
-        // }
-        // const response = await axios.get("https://api.geoapify.com/v1/routing",
-        //     { params }, 
-        //     {
-        //         headers: {
-        //         "Content-Type": "application/x-www-form-urlencoded",
-        //         "Accept-Encoding": "*",
-        //     }
-        // });
-        // const result = response.data;
         let nodes = result.features[0].geometry.coordinates[0];
         this.route = padRoute(nodes, routePadding);
         this.currentIndex = 0;
     }
     this.move = () => {
         const start = this.route[this.currentIndex];
+        // if something happened, abort
+        if (!start) {
+            console.log("Unexpected stop", start)
+            return {
+                finished: true
+            };
+        }
         let end = null;
         // Failsafe if trying to move past final destination
         if (this.currentIndex < this.route.length - 1) {
             end = this.route[this.currentIndex + 1];
+            this.traveledKilometers += distance(start.latitude, end.latitude, start.longitude, end.longitude);
             this.currentIndex++;
         } else {
             end = start;
