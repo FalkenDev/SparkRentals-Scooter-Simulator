@@ -49,7 +49,6 @@ function distance(lat1, lat2, lon1, lon2) {
 
 /**
  * Returns random coordinate in boundary defined above.
- * Currently hard coded for trossö
  * @return coordinate
  */
 function getRandomCoordnates() {

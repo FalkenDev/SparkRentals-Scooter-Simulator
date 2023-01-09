@@ -100,16 +100,11 @@ async function dropCallback() {
     console.log("Starting scooters")
     startUpdateScooters();
     printScooters(true);
-    //TODO: Add watch on mongoDB database
-    //IF NEW SCOOTER, ADD IT
-    //IF SCOOTER IS REMOVED, REMOVES IT FROM ARRAY
 }
 
 async function main() {
     db.setMongoURI(process.env.DBURI);
     db.connect();
-    // console.log("Dropping scooter collection...");
-    // db.dropScooters(dropCallback);
     dropCallback();
 }
 
