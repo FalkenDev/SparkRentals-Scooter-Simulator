@@ -23,9 +23,13 @@ The docker version:
 
 Required environment variables:
 
-    #DB CONFIG
+    #--------------------- General -----------------------
     DBURI=YOUR_MONGO_CONNECTION_STRING
     GEOAPIFY_KEY=YOUR_GEOAPIFY_KEY
+    API_URL=URL_YO_YOUR_API
+    REACT_APP_REST_API_KEY=YOUR_API_KEY
+
+    #--------------------- Simulation config -----------------------
 
     #SCOOTER_CONFIG
     NUMBER_OF_SCOOTERS=NUMBER_OF_SCOOTERS_TO_GENERATE
@@ -33,8 +37,7 @@ Required environment variables:
     BATTERY_DEPLETION_RATE=0.005
     SIMULATION_CITY=YOUR_CITY
 
-    #--------------------- "DROP ZONE" of scooters -----------------------
-    #KARLSKRONA
+    #KARLSKRONA DROPZONE EXAMPLE
     SIMULATION_MAX_LAT="56.166217"
     SIMULATION_MIN_LAT="56.158594"
     SIMULATION_MAX_LON="15.593868"
@@ -43,17 +46,8 @@ Required environment variables:
     # The higher the number, the slower the scooters move. 10 is recommended
     SIMULATION_ROUTE_PADDING=10
 
-    #SIMULATION
     SIMULATION_EMAIL=ADMIN_EMAIL
     SIMULATION_PASSWORD=ADMIN_PASSWORD
-
-    #-------------- REST API URLS ------------------------------
-    # API_URL=http://sparkrentals.software:8393/v1
-    # API_URL=http://localhost:8393/v1
-    # API_URL=http://api-server:8393/v1
-
-    # Uses same key as from the admin dashboard
-    # REACT_APP_REST_API_KEY=YOUR_API_KEY
 
 ## License and Tools
 ![NPM](https://img.shields.io/badge/NPM-%23000000.svg?style=for-the-badge&logo=npm&logoColor=white) ![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
