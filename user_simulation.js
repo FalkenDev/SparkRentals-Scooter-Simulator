@@ -10,6 +10,7 @@ const apiKey = process.env.REACT_APP_REST_API_KEY;
 const rentWatchPollRate = 5000;
 const minBalance = 50;
 let token = null;
+let users = [];
 
 const admin = {
     email: process.env.SIMULATION_EMAIL,
@@ -54,7 +55,15 @@ async function stopTrip(scooter_id, user_id, token) {
 }
 
 async function rentWatch() {
-    const scooters = await db.getScootersInUse(process.env.SIMULATION_CITY);
+    const scooters = (await db.getScootersInUse(process.env.SIMULATION_CITY)).filter(scooter => {
+        // Filter out scooters that arent in use by simulation accounts
+        for (let i = 0; i < users.length; i++) {
+            if (scooter.trip.userId === users[i]._id.toString()) {
+                return true;
+            }
+        }
+        return false;
+    });
     console.log("scooters in use:", scooters.length);
     scooters.forEach(scooter => {
         //Stop the trip if speed is 0 or if battery is entering the danger zone
@@ -76,7 +85,8 @@ async function rentWatch() {
 async function main() {
     db.setMongoURI(process.env.DBURI);
     db.connect();
-    const users = await db.getAllUsers();
+    // filter out real users
+    users = await db.getAllFakeUsers();
     const scooters = await db.getAllScooters();
     console.log("Logging in as admin...");
     token = await adminLogin(admin.email, admin.password);
@@ -86,11 +96,10 @@ async function main() {
         const user = users[i];
         const scooter = scooters[i];
         if (scooter.status === "Available" && user.balance > minBalance && scooter.owner === process.env.SIMULATION_CITY) {
-            console.log(process.env.SIMULATION_CITY);
             const response = await rentScooter(scooter._id.toString(), user._id.toString(), token);
         }
     }
     setTimeout(rentWatch, rentWatchPollRate)
 }
 
-main();
+setTimeout(main, 5000);
