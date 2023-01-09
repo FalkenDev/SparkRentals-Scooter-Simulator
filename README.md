@@ -23,6 +23,7 @@ The docker version:
     jolpango/user-simulation:latest: The same as user_simulation but in docker.
 
 Required environment variables:
+
     #DB CONFIG
     DBURI=YOUR_MONGO_CONNECTION_STRING
     GEOAPIFY_KEY=YOUR_GEOAPIFY_KEY
@@ -53,7 +54,7 @@ Required environment variables:
     # API_URL=http://api-server:8393/v1
 
     # Uses same key as from the admin dashboard
-    # REACT_APP_REST_API_KEY="681e9db4d1f9890557d025dcdf99c0a6"
+    # REACT_APP_REST_API_KEY=YOUR_API_KEY
 
 ## Version
 ## Contact
