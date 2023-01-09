@@ -95,7 +95,17 @@ function printScooter(scooter) {
     console.log("battery:", scooter.battery);
     console.log("coordinates:", "{ " + scooter.gpsComponent.coordinates.latitude + ", " + scooter.gpsComponent.coordinates.longitude + " }");
     console.log("speed:", scooter.gpsComponent.speed, "km/h")
-} 
+}
+
+/**
+ * @param mixed c1
+ * @param mixed c2
+ * 
+ * @return boolean
+ */
+function coordinateEquals(c1, c2) {
+    return c1.latitude === c2.latitude && c1.longitude === c2.longitude;
+}
 
 /**
  * A single scooter simulating a real electric scooter.
@@ -175,7 +185,11 @@ function Scooter(errorCallback)
             setTimeout(() => this.update(print), updateFrequencyMilliseconds)
             return;
         }
-        this.battery -= batteryDepletionRate * (this.gpsComponent.speed + 1);
+        if (this.status !== "Charging") {
+            this.battery -= batteryDepletionRate * (this.gpsComponent.speed + 1);
+        } else {
+            this.battery += batteryDepletionRate * 10;
+        }
         if (result.status !== this.status) {
             if (result.status === "In use") {
                 // Start the new trip
@@ -206,13 +220,17 @@ function Scooter(errorCallback)
         if (this.battery < lowBatteryWarning) {
             this.status = "Unavailable";
             db.updateStatus(this._id, this.status);
+        } else if (this.battery <= 0) {
+            console.log(`${this.name}: Battery depleted`);
+            this.battery = 0;
+            this.status === "Off";
         }
-        // if (result.coordinates !== this.gpsComponent.coordinates) {
-        //     // new coordinates manually set
-        //     // If this happens when a trip is in progress, what to do?
-        //     console.log(`${this.name}: Coordinate changed`)
-        //     this.gpsComponent.coordinates = result.coordinates;
-        // }
+        if (!coordinateEquals(result.coordinates, this.gpsComponent.coordinates)) {
+            // new coordinates manually set
+            // If this happens when a trip is in progress, what to do?
+            console.log(`${this.name}: Coordinate changed`)
+            this.gpsComponent.coordinates = result.coordinates;
+        }
         this.gpsComponent.update(updateFrequencyMilliseconds);
         db.updateScooterStates(this._id, this.gpsComponent.coordinates, this.gpsComponent.speed, this.battery);
         if (this.canUpdateTrip()) {
