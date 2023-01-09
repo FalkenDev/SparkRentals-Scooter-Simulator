@@ -139,6 +139,37 @@ async function updateScooterStates(scooterID, coordinates, speed, battery) {
     }
 }
 
+
+/**
+  * @param mixed scooterID
+  * @param mixed distance
+  * 
+  * @return [type]
+  */
+async function updateScooterTrip(scooterID, distance) {
+    // const client = new MongoClient(mongoURI);
+    try {
+        const database = client.db(databaseName);
+        const collection = database.collection(collectionName);
+        const result = await collection.updateOne({ _id: scooterID }, {
+            $set: {
+                "trip.distance": distance
+            }
+        });
+        // console.log(result);
+        // console.log(await findScooter(scooterID.toString()));
+        if (result.matchedCount !== 1) {
+            throw "Error updating scooter in database.";
+        }
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    } finally {
+        // await client.close();
+    }
+}
+
 /**
   * @param mixed coordinates
   * @param number speed
@@ -220,6 +251,20 @@ async function getAllUsers() {
 }
 
 /**
+  * Returns all "fake" documents from collection "users"
+  * @return []
+  */
+async function getAllFakeUsers() {
+    const database = client.db(databaseName);
+    const collection = database.collection("users");
+    const cursor = collection.find({ "autoGen": true });
+    const items = [];
+    await cursor.forEach((item) => {
+        items.push(item);
+    });
+    return items;}
+
+/**
   * Returns all documents from collection "scooters"
   * @return []
   */
@@ -273,5 +318,7 @@ module.exports = {
     getAllUsers: getAllUsers,
     getAllScooters: getAllScooters,
     getScootersInUse: getScootersInUse,
-    dropScooters: dropScooters
+    dropScooters: dropScooters,
+    getAllFakeUsers: getAllFakeUsers,
+    updateScooterTrip: updateScooterTrip
 }
