@@ -1,3 +1,6 @@
+/**
+ * Used to simulate a system of X users towards a Sparkrentals API.
+ */
 const axios = require("axios");
 const db = require("./modules/sparkdb");
 require("dotenv").config();
@@ -27,31 +30,41 @@ async function adminLogin(email, password) {
 }
 
 async function rentScooter(scooter_id, user_id, token) {
-    const response = await axios.post(`${api}${rentEndpoint}`, {
-        scooter_id: scooter_id,
-        user_id: user_id,
-        api_key: apiKey
-    }, {
-        headers: {
-            "content-type": "application/json",
-            "x-access-token": token
-        }
-    });
-    return response;
+    try {
+        const response = await axios.post(`${api}${rentEndpoint}`, {
+            scooter_id: scooter_id,
+            user_id: user_id,
+            api_key: apiKey
+        }, {
+            headers: {
+                "content-type": "application/json",
+                "x-access-token": token
+            },
+            timeout: 5000 
+        });
+        return response;
+    } catch (e) {
+        return false;
+    }
 }
 
 async function stopTrip(scooter_id, user_id, token) {
-    const response = await axios.post(`${api}${stopEndpoint}`, {
-        scooter_id: scooter_id,
-        user_id: user_id,
-        api_key: apiKey
-    }, {
-        headers: {
-            "content-type": "application/json",
-            "x-access-token": token
-        }
-    });
-    return response;
+    try {
+        const response = await axios.post(`${api}${stopEndpoint}`, {
+            scooter_id: scooter_id,
+            user_id: user_id,
+            api_key: apiKey
+        }, {
+            headers: {
+                "content-type": "application/json",
+                "x-access-token": token
+            },
+            timeout: 5000 
+        });
+        return response;
+    } catch (e) {
+        return false;
+    }
 }
 
 async function rentWatch() {
