@@ -83,6 +83,42 @@ function removeScooter(id) {
     }
 }
 
+ /**
+  * @param string id
+  * 
+  * @return [type]
+  */
+async function newScooterCallback(id) {
+    const scooter = new Scooter(removeScooter);
+    await scooter.load(id);
+    scooter.update();
+    scooters.push(scooter);
+}
+
+/**
+  * @return void
+  */
+async function watchForInsert() {
+    const dbScooters = await db.getAllScooters();
+    const newScooters = dbScooters.filter(newScooter => {
+        for (let i = 0; i < scooters.length; i++) {
+            const oldScooter = scooters[i];
+            if (oldScooter._id.toString() === newScooter._id.toString()) {
+                return false;
+            }
+        }
+        return true;
+    })
+    for (let i = 0; i < newScooters.length; i++) {
+        const scooter = new Scooter(removeScooter);
+        await scooter.load(newScooters[i]._id.toString());
+        console.log("New scooter added:", scooter._id.toString());
+        scooter.update();
+        scooters.push(scooter);
+    }
+    setTimeout(watchForInsert, 20000);
+}
+
 /**
   * @return [type]
   */
@@ -99,6 +135,7 @@ async function dropCallback() {
     scooters = scooters.concat(oldScooters);
     console.log("Starting scooters")
     startUpdateScooters();
+    watchForInsert();
     printScooters(true);
 }
 
