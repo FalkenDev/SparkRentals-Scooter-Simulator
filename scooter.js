@@ -20,7 +20,6 @@ require("dotenv").config();
 const { ObjectId } = require("mongodb");
 const db = require("./modules/sparkdb");
 const { GPSComponent } = require("./modules/gps");
-const axios = require("axios");
 
 const updateFrequencyMilliseconds = process.env.UPDATE_FREQUENCY_MILLISECONDS;
 const batteryDepletionRate = process.env.BATTERY_DEPLETION_RATE;
@@ -94,7 +93,7 @@ function printScooter(scooter) {
     console.log("status:", scooter.status);
     console.log("battery:", scooter.battery);
     console.log("coordinates:", "{ " + scooter.gpsComponent.coordinates.latitude + ", " + scooter.gpsComponent.coordinates.longitude + " }");
-    console.log("speed:", scooter.gpsComponent.speed, "km/h")
+    console.log("speed:", scooter.gpsComponent.speed, "km/h");
 }
 
 /**
@@ -189,6 +188,9 @@ function Scooter(errorCallback)
             this.battery -= batteryDepletionRate * (this.gpsComponent.speed + 1);
         } else {
             this.battery += batteryDepletionRate * 10;
+            if (this.battery > 100) {
+                this.battery = 100;
+            }
         }
         if (result.status !== this.status) {
             if (result.status === "In use") {
