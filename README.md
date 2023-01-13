@@ -14,12 +14,19 @@ The scooter program will be the very brain of every scooter that is driven. The 
 ## Download and Usage
 To run this program you have to use either node or docker.
 The node version:
-    node scooter_hive.js: This will start a hive of scooters. Spawning new ones if defined and also starting all existing scooters on your database. It will run scooters in all cities but only spawn random ones i a city of your choosing. Defined by env variables.
-    node user_simulation.js: This will start a rent simulation. It fetches all fake users from your database(defined by an autoGen property on the account). It will then attempt to rent as many scooters as possible(Some users wont rent because of lacking money or if a scooter is unavailable). The user simulation only works on one city at a time, this is defined by environment variables.
+
+    node scooter_hive.js: This will start a hive of scooters.
+    Spawning new ones if defined and also starting all existing scooters on your database.
+    It will run scooters in all cities but only spawn random ones i a city of your choosing. Defined by env variables.
+    node user_simulation.js: This will start a rent simulation.
+    It fetches all fake users from your database(defined by an autoGen property on the account).
+    It will then attempt to rent as many scooters as possible(Some users wont rent because of lacking money or if a scooter is unavailable).
+    The user simulation only works on one city at a time, this is defined by environment variables.
 
 The docker version:
-    jolpango/scooter-simulation:latest: The same as scooter_hive but in docker.
-    jolpango/user-simulation:latest: The same as user_simulation but in docker.
+
+    jolpango/scooter-simulation:stable: The same as scooter_hive but in docker.
+    jolpango/user-simulation:stable: The same as user_simulation but in docker.
 
 Required environment variables:
 
